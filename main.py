@@ -8,6 +8,7 @@ class messageChunk:
 		self.time = time
 
 
+wordOccurenaceDate = defaultdict(int)
 
 def findWordOccurences():
 	wordOccurences = defaultdict(int)
@@ -36,9 +37,37 @@ def findCommentsPerMonth():
 				temp = str(datetime.datetime.fromtimestamp(int(temp)))
 				temp = temp[:7]
 				date[temp]+=1
-
 	for d in date:
 		print(d, ",",date[d])
+
+def findWordOccurencePerMonth(file):
+	with open(file) as f:
+		for line in f:
+			if "sender_name" in line:
+				temp = f.readline()
+				content = f.readline()
+				# if "woke" in content:
+				temp = temp[19:29]
+				temp = str(datetime.datetime.fromtimestamp(int(temp)))
+				temp = temp[:7]
+				wordOccurenaceDate[temp]+=1
+
+
+def findWhoTalksTheMost():
+	person = defaultdict(int)
+	with open('message.json') as f:
+		for line in f:
+			if "sender_name" in line:
+				time = f.readline()
+				content = f.readline()
+				if "hate" in content:
+					temp = line[22:]
+					temp = temp[:-3]
+					person[temp]+=1
+	print("The amount of times the word pretty was used")
+	for key in person:
+		print(key,person[key])
+				
 
 def findTotalComments(file):
 	totalComments = 0
@@ -62,7 +91,7 @@ def findTotalComments(file):
 						participant+=char
 					participants.append(participant)
 	if(isValidChat):
-		if participants.length(==1):
+		if (participants.length()==1):
 			print(totalComments,",", end = "")
 			print(participants)
 
@@ -71,7 +100,11 @@ def forEveryFile():
 		for filename in filenames:
 			if (filename == "message.json"):
 				fileToOpen = dirpath + '/' +filename
-				findTotalComments(fileToOpen)
+				findWordOccurencePerMonth(fileToOpen)
+	for d in wordOccurenaceDate:
+		print(d, ",",wordOccurenaceDate[d])
+
+
 
 
 
