@@ -1,115 +1,38 @@
 import datetime
+import json
 import os
 from collections import defaultdict
 
-class messageChunk:
-	def __init__(self, name, time):
-		self.name = name
-		self.time = time
+class message_class:
+	def __init__(self):
+		self.participants = None
+		self.wordOccurrence = defaultdict(lambda: defaultdict(int))
+		self.messageOccurrence = defaultdict(lambda: defaultdict(int))
+		
+def analyzeFile(message_file,message_data):
+	with open(message_file) as data_file:
+		data = data_file.read()
+		data = json.loads(data)
+		for message in data['messages']:
+			time = datetime.datetime.fromtimestamp(message['timestamp_ms']/1000.0)
+			message_data.messageOccurrence[message['sender_name']][str(time.year)+'-'+str(time.month)] += 1
+			if 'content' in message:
+				message_data.wordOccurrence[message['sender_name']][str(time.year)+'-'+str(time.month)] += len(message['content'].split())
 
 
-wordOccurenaceDate = defaultdict(int)
-
-def findWordOccurences():
-	wordOccurences = defaultdict(int)
-	with open('message.json') as f:
-		for line in f:
-			if "content" in line:
-				temp = line[18:-3]
-				sentence = temp.split()
-				for word in sentence:
-					word = word.lower()
-					wordOccurences[word]+=1
-				total = sorted(wordOccurences.items(), key=lambda x:x[1])
-				# for x in range(10):
-	total = total[::-1]
-	for x in range(50):
-		print( '#', x+1 ,total[x])
-
-
-def findCommentsPerMonth():
-	date = defaultdict(int)
-	with open('message.json') as f:
-		for line in f:
-			if "sender_name" in line:
-				temp = f.readline()
-				temp = temp[19:29]
-				temp = str(datetime.datetime.fromtimestamp(int(temp)))
-				temp = temp[:7]
-				date[temp]+=1
-	for d in date:
-		print(d, ",",date[d])
-
-def findWordOccurencePerMonth(file):
-	with open(file) as f:
-		for line in f:
-			if "sender_name" in line:
-				temp = f.readline()
-				content = f.readline()
-				# if "woke" in content:
-				temp = temp[19:29]
-				temp = str(datetime.datetime.fromtimestamp(int(temp)))
-				temp = temp[:7]
-				wordOccurenaceDate[temp]+=1
-
-
-def findWhoTalksTheMost():
-	person = defaultdict(int)
-	with open('message.json') as f:
-		for line in f:
-			if "sender_name" in line:
-				time = f.readline()
-				content = f.readline()
-				if "hate" in content:
-					temp = line[22:]
-					temp = temp[:-3]
-					person[temp]+=1
-	print("The amount of times the word pretty was used")
-	for key in person:
-		print(key,person[key])
-				
-
-def findTotalComments(file):
-	totalComments = 0
-	isValidChat = False
-	with open(file) as f:
-		for line in f:
-			if "sender_name" in line:
-				totalComments+=1;
-			if "\"participants\": [" in line:
-				isValidChat = True
-				participants = []
-				while (True):
-					temp = f.readline()
-					participant = ""
-					if '],' in temp:
-						break
-					temp = temp[5:]
-					for char in temp:
-						if (char=='\"'):
-							break
-						participant+=char
-					participants.append(participant)
-	if(isValidChat):
-		if (participants.length()==1):
-			print(totalComments,",", end = "")
-			print(participants)
-
-def forEveryFile():
-	for (dirpath, dirnames, filenames) in os.walk('./'):
+def forPerson():
+	dir_folder = "/mnt/c/Users/black/Downloads/messages/inbox/TatienneWang_QlbSNmRtJQ"
+	message_data = message_class()
+	for (dirpath, dirnames, filenames) in os.walk(dir_folder):
 		for filename in filenames:
-			if (filename == "message.json"):
-				fileToOpen = dirpath + '/' +filename
-				findWordOccurencePerMonth(fileToOpen)
-	for d in wordOccurenaceDate:
-		print(d, ",",wordOccurenaceDate[d])
-
-
-
-
-
-
-forEveryFile()
+			if filename.endswith(".json"):
+				analyzeFile(dirpath + '/' + filename,message_data)
+	output_file = open(dir_folder + '/' +'output.csv','w')
+	for key in message_data.messageOccurrence:
+		output_file.write(key + '\n')
+		for time in message_data.messageOccurrence[key]:
+			output_file.write(str(time)+','+str(message_data.messageOccurrence[key][time])+','+str(message_data.wordOccurrence[key][time])+'\n')
+forPerson()
 
 
 
