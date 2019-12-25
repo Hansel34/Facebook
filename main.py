@@ -20,8 +20,8 @@ def analyzeFile(message_file,message_data):
 				message_data.wordOccurrence[message['sender_name']][str(time.year)+'-'+str(time.month)] += len(message['content'].split())
 
 
-def forPerson():
-	dir_folder = "/mnt/c/Users/black/Downloads/messages/inbox/TatienneWang_QlbSNmRtJQ"
+def forPerson(dir):
+	dir_folder = "dir"
 	message_data = message_class()
 	for (dirpath, dirnames, filenames) in os.walk(dir_folder):
 		for filename in filenames:
@@ -32,7 +32,15 @@ def forPerson():
 		output_file.write(key + '\n')
 		for time in message_data.messageOccurrence[key]:
 			output_file.write(str(time)+','+str(message_data.messageOccurrence[key][time])+','+str(message_data.wordOccurrence[key][time])+'\n')
-forPerson()
+
+
+def traverseFolder():
+	for path, sub_path, file_names in  os.walk("/mnt/c/Users/black/Downloads/messages/"):
+		for file in file_names:
+			if file.endswith(".json"):
+				print(file)
+
+traverseFolder()
 
 
 
